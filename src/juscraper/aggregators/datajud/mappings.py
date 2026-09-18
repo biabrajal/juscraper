@@ -1,8 +1,12 @@
 """Maps (id_justica, id_tribunal) from CNJ to Datajud API alias.
 
 Fonte de verdade dos aliases: http://datajud-wiki.cnj.jus.br/api-publica/endpoints/.
-Ao adicionar/alterar um alias, conferir contra a wiki — em particular notar que
-o DF nao segue o padrao "tre-df": o alias oficial e `api_publica_tre-dft`.
+Ao adicionar/alterar um alias, conferir contra a wiki. Cuidado especial com o
+TRE do DF: `api_publica_tre-dft` (com "t") devolve 404
+(``index_not_found_exception``) — o alias real e `api_publica_tre-df`,
+seguindo o padrao dos demais TREs. Confirmado por chamada direta a API em
+2026-09-17. Nao confundir com TJDFT (Justica Estadual, id_justica="8"),
+cujo alias e `api_publica_tjdft` (com "t") e esta correto.
 """
 
 ID_JUSTICA_TRIBUNAL_TO_ALIAS = {
@@ -77,7 +81,7 @@ ID_JUSTICA_TRIBUNAL_TO_ALIAS = {
     ("6", "04"): "api_publica_tre-am",  # TRE-AM
     ("6", "05"): "api_publica_tre-ba",  # TRE-BA
     ("6", "06"): "api_publica_tre-ce",  # TRE-CE
-    ("6", "07"): "api_publica_tre-dft",  # TRE-DFT (alias oficial DataJud)
+    ("6", "07"): "api_publica_tre-df",  # TRE-DF (nao "tre-dft" -- ver docstring do modulo)
     ("6", "08"): "api_publica_tre-es",  # TRE-ES
     ("6", "09"): "api_publica_tre-go",  # TRE-GO
     ("6", "10"): "api_publica_tre-ma",  # TRE-MA
@@ -188,10 +192,11 @@ TRIBUNAL_TO_ALIAS = {
     "TRE-AM": "api_publica_tre-am",
     "TRE-BA": "api_publica_tre-ba",
     "TRE-CE": "api_publica_tre-ce",
-    "TRE-DFT": "api_publica_tre-dft",
-    # Alias de conveniência: usuários tipicamente escrevem "TRE-DF"
-    # mesmo a sigla oficial DataJud sendo "tre-dft".
-    "TRE-DF": "api_publica_tre-dft",
+    "TRE-DF": "api_publica_tre-df",
+    # Alias de conveniência para quem escreve "TRE-DFT" (nome do tribunal
+    # e "TRE do Distrito Federal e Territórios") -- o alias real na API
+    # publica do Datajud e "tre-df", sem o "t" (ver docstring do modulo).
+    "TRE-DFT": "api_publica_tre-df",
     "TRE-ES": "api_publica_tre-es",
     "TRE-GO": "api_publica_tre-go",
     "TRE-MA": "api_publica_tre-ma",

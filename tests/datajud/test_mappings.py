@@ -27,15 +27,18 @@ class TestIdJusticaTribunalToAlias:
             alias = ID_JUSTICA_TRIBUNAL_TO_ALIAS[("6", f"{i:02d}")]
             assert alias.startswith("api_publica_tre-")
 
-    def test_tre_dft_alias_oficial(self):
-        # A wiki oficial do DataJud usa "tre-dft" (não "tre-df")
-        assert ID_JUSTICA_TRIBUNAL_TO_ALIAS[("6", "07")] == "api_publica_tre-dft"
+    def test_tre_df_alias_oficial(self):
+        # "api_publica_tre-dft" devolve 404 (index_not_found_exception) na
+        # API real -- o alias oficial e "api_publica_tre-df", seguindo o
+        # padrao dos demais TREs. Confirmado por chamada direta em 2026-09-17.
+        assert ID_JUSTICA_TRIBUNAL_TO_ALIAS[("6", "07")] == "api_publica_tre-df"
 
 
 class TestTreDfAliasConveniencia:
-    def test_tre_df_resolve_para_dft(self):
-        # Sigla popular TRE-DF deve resolver para o alias oficial tre-dft
-        assert TRIBUNAL_TO_ALIAS["TRE-DF"] == "api_publica_tre-dft"
+    def test_tre_dft_resolve_para_df(self):
+        # Sigla popular TRE-DFT (nome do tribunal) deve resolver para o
+        # alias real tre-df.
+        assert TRIBUNAL_TO_ALIAS["TRE-DFT"] == "api_publica_tre-df"
 
     def test_tre_df_e_tre_dft_apontam_pro_mesmo_alias(self):
         assert TRIBUNAL_TO_ALIAS["TRE-DF"] == TRIBUNAL_TO_ALIAS["TRE-DFT"]
