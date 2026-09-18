@@ -112,6 +112,16 @@ TYPE_GRACE_PERIOD: dict[tuple[str, str], str] = {
         "OutputCJSGTJGO",
         "data_publicacao",
     ): "TJGO parser nao converte data_publicacao para date — unificar em PR de limpeza",
+    # ComunicaCNJ e o unico endpoint onde ``pesquisa`` (busca por texto) e
+    # uma entre tres formas alternativas de filtrar (as outras sao
+    # numero_processo/sigla_tribunal) — por isso e opcional aqui, diferente
+    # do canonico ``str`` obrigatorio de SearchBase. Divergencia intencional
+    # e permanente (nao e debito tecnico a corrigir), documentada tambem em
+    # InputListarComunicacoesComunicaCNJ.
+    (
+        "InputListarComunicacoesComunicaCNJ",
+        "pesquisa",
+    ): "ComunicaCNJ aceita numero_processo/sigla_tribunal como alternativa a pesquisa — divergencia intencional, nao debito tecnico",
 }
 
 

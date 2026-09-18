@@ -19,13 +19,29 @@ class InputListarComunicacoesComunicaCNJ(PaginasMixin):
 
     Campos:
         pesquisa: Termo livre buscado no texto da comunicacao (parametro
-            ``texto`` da API). Obrigatorio.
+            ``texto`` da API). Opcional — ver exigencia de pelo menos um
+            filtro abaixo.
+        numero_processo: CNJ (formatado ou so digitos) para localizar as
+            comunicacoes de um processo especifico (parametro
+            ``numeroProcesso`` da API). Opcional.
+        sigla_tribunal: Sigla do tribunal de origem (ex.: ``"TSE"``,
+            ``"TRE-SP"``) (parametro ``siglaTribunal`` da API). Opcional.
         data_disponibilizacao_inicio: Limite inferior de
             ``dataDisponibilizacao``, ISO ``YYYY-MM-DD``. Opcional.
         data_disponibilizacao_fim: Limite superior de
             ``dataDisponibilizacao``, ISO ``YYYY-MM-DD``. Opcional.
         itens_por_pagina: Quantos resultados por requisicao (1-100). Default
             100 para minimizar round-trips.
+
+    Pelo menos um entre ``pesquisa``, ``numero_processo`` e
+    ``sigla_tribunal`` e obrigatorio — sem nenhum filtro, a API devolve o
+    feed nacional inteiro (todos os tribunais, sem corte), o que nao e um
+    uso responsavel de uma API publica gratuita. Essa exigencia e checada
+    em :meth:`ComunicaCNJScraper.listar_comunicacoes` (``ValueError``), nao
+    aqui no schema — mesmo padrao de ``tribunal``/``numero_processo`` em
+    :class:`~juscraper.aggregators.datajud.schemas.InputListarProcessosDataJud`,
+    que mantem o Input sempre instanciavel com payload minimo vazio
+    (``tests/schemas/test_schema_contract.py``).
 
     Os nomes ``data_inicio``/``data_fim`` ficaram **fora** do canonico de
     proposito: no resto do juscraper, esses dois sao aliases deprecados que
@@ -38,7 +54,9 @@ class InputListarComunicacoesComunicaCNJ(PaginasMixin):
 
     BACKEND_DATE_FORMAT: ClassVar[str] = "%Y-%m-%d"
 
-    pesquisa: str
+    pesquisa: str | None = None
+    numero_processo: str | None = None
+    sigla_tribunal: str | None = None
     data_disponibilizacao_inicio: str | None = None
     data_disponibilizacao_fim: str | None = None
     itens_por_pagina: int = Field(default=100, ge=1, le=100)

@@ -2,8 +2,9 @@
 
 Confirma que cada filtro aceito pelo schema chega como parametro de
 querystring no GET ao endpoint, no nome canonico esperado pela API
-(``texto``, ``itensPorPagina``, ``pagina``, ``dataDisponibilizacaoInicio``,
-``dataDisponibilizacaoFim``). Cobre tambem:
+(``texto``, ``numeroProcesso``, ``siglaTribunal``, ``itensPorPagina``,
+``pagina``, ``dataDisponibilizacaoInicio``, ``dataDisponibilizacaoFim``).
+Cobre tambem:
 
 - conversao automatica de datas em ``DD/MM/YYYY`` para ISO ``YYYY-MM-DD``
   via ``to_iso_date`` (regra 4 do CLAUDE.md "Convencao de API");
@@ -12,7 +13,10 @@ querystring no GET ao endpoint, no nome canonico esperado pela API
 - ausencia de aliases deprecados (a API ComunicaCNJ e nova; o schema
   usa ``data_disponibilizacao_inicio``/``_fim`` como nomes canonicos
   exatamente para evitar colisao com ``data_inicio``/``data_fim``, que
-  no resto do projeto sao aliases deprecados de ``data_julgamento_*``).
+  no resto do projeto sao aliases deprecados de ``data_julgamento_*``);
+- exigencia de ao menos um filtro entre ``pesquisa``, ``numero_processo``
+  e ``sigla_tribunal`` (nenhum informado -> ``ValidationError``, sem
+  requisicao HTTP).
 """
 from __future__ import annotations
 
@@ -135,3 +139,60 @@ def test_listar_comunicacoes_itens_por_pagina_zero():
             pesquisa="resolucao",
             itens_por_pagina=0,
         )
+
+
+@responses.activate
+def test_listar_comunicacoes_por_numero_processo_sem_pesquisa(mocker):
+    """``numero_processo`` sozinho (sem ``pesquisa``) e um filtro valido —
+    nao manda o parametro ``texto`` na querystring."""
+    mocker.patch("time.sleep")
+    params = build_listar_comunicacoes_params(
+        pagina=1,
+        itens_por_pagina=100,
+        numero_processo="0601447-57.2026.6.00.0000",
+    )
+    assert "texto" not in params
+    responses.add(
+        responses.GET,
+        BASE_URL,
+        body=load_sample("comunica_cnj", "listar_comunicacoes/single_page.json"),
+        status=200,
+        content_type="application/json",
+        match=[query_param_matcher({k: str(v) for k, v in params.items()})],
+    )
+
+    df = jus.scraper("comunica_cnj").listar_comunicacoes(
+        numero_processo="0601447-57.2026.6.00.0000",
+    )
+
+    assert isinstance(df, pd.DataFrame)
+
+
+@responses.activate
+def test_listar_comunicacoes_por_sigla_tribunal_sem_pesquisa(mocker):
+    """``sigla_tribunal`` sozinho (sem ``pesquisa``) e um filtro valido —
+    chega como ``siglaTribunal`` na querystring."""
+    mocker.patch("time.sleep")
+    params = build_listar_comunicacoes_params(
+        pagina=1,
+        itens_por_pagina=100,
+        sigla_tribunal="TSE",
+        data_disponibilizacao_inicio="2026-07-01",
+        data_disponibilizacao_fim="2026-10-30",
+    )
+    responses.add(
+        responses.GET,
+        BASE_URL,
+        body=load_sample("comunica_cnj", "listar_comunicacoes/single_page.json"),
+        status=200,
+        content_type="application/json",
+        match=[query_param_matcher({k: str(v) for k, v in params.items()})],
+    )
+
+    df = jus.scraper("comunica_cnj").listar_comunicacoes(
+        sigla_tribunal="TSE",
+        data_disponibilizacao_inicio="2026-07-01",
+        data_disponibilizacao_fim="2026-10-30",
+    )
+
+    assert isinstance(df, pd.DataFrame)

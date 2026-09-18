@@ -127,10 +127,14 @@ def test_listar_comunicacoes_no_results(mocker):
     assert df.empty
 
 
-def test_listar_comunicacoes_pesquisa_obrigatoria():
-    """``pesquisa=None`` levanta ``ValidationError`` via pydantic
-    (``pesquisa: str`` no schema, sem default)."""
-    with pytest.raises(ValidationError):
+def test_listar_comunicacoes_sem_filtro_algum_e_invalido():
+    """Nenhum filtro informado levanta ``ValueError`` — ``pesquisa``,
+    ``numero_processo`` e ``sigla_tribunal`` sao todos opcionais
+    individualmente no schema (mantendo-o instanciavel com payload
+    minimo vazio, cf. ``test_schema_contract.py``), mas o client exige ao
+    menos um dos tres antes de qualquer requisicao, mesmo padrao de
+    ``tribunal``/``numero_processo`` em ``DatajudScraper``."""
+    with pytest.raises(ValueError):
         jus.scraper("comunica_cnj").listar_comunicacoes()
 
 

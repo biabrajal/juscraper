@@ -2,10 +2,12 @@
 
 Wrapper sobre a API publica de Comunicacoes Processuais do CNJ
 (``https://comunicaapi.pje.jus.br/api/v1/comunicacao``). O metodo
-:meth:`ComunicaCNJScraper.listar_comunicacoes` aceita um termo de busca
-obrigatorio (``pesquisa``) e filtros opcionais por intervalo de
-disponibilizacao (``data_disponibilizacao_inicio``/``_fim``), pagina o
-resultado e devolve um ``pandas.DataFrame``.
+:meth:`ComunicaCNJScraper.listar_comunicacoes` aceita busca por texto
+livre (``pesquisa``), por processo (``numero_processo``) e/ou por tribunal
+(``sigla_tribunal``) -- ao menos um dos tres e obrigatorio -- alem de
+filtros opcionais por intervalo de disponibilizacao
+(``data_disponibilizacao_inicio``/``_fim``), pagina o resultado e devolve
+um ``pandas.DataFrame``.
 """
 from __future__ import annotations
 
@@ -54,13 +56,18 @@ class ComunicaCNJScraper(HTTPScraper):
 
         Args:
             pesquisa: Termo livre buscado no texto da comunicacao
-                (parametro ``texto`` da API). Obrigatorio.
+                (parametro ``texto`` da API). Opcional -- ver exigencia de
+                pelo menos um filtro abaixo.
             paginas: Intervalo 1-based. Aceita ``int`` (``3`` ->
                 ``range(1, 4)``), ``list``, ``range`` ou ``None``
                 (default = todas as paginas).
             **kwargs: Filtros opcionais aceitos pelo schema
                 :class:`InputListarComunicacoesComunicaCNJ`:
 
+                * ``numero_processo`` (str): CNJ, formatado ou so digitos.
+                  Backend: ``numeroProcesso``.
+                * ``sigla_tribunal`` (str): Sigla do tribunal de origem
+                  (ex.: ``"TSE"``, ``"TRE-SP"``). Backend: ``siglaTribunal``.
                 * ``data_disponibilizacao_inicio`` (str): Inicio do
                   intervalo de ``dataDisponibilizacao``. Aceita ISO
                   ``YYYY-MM-DD`` ou formato brasileiro ``DD/MM/YYYY``
@@ -70,6 +77,9 @@ class ComunicaCNJScraper(HTTPScraper):
                 * ``itens_por_pagina`` (int): Resultados por requisicao
                   (1-100, default 100).
 
+            Pelo menos um entre ``pesquisa``, ``numero_processo`` e
+            ``sigla_tribunal`` e obrigatorio.
+
         Returns:
             DataFrame com uma linha por comunicacao. As colunas refletem
             o JSON ``items`` da API (campos como ``numero_processo``,
@@ -77,10 +87,11 @@ class ComunicaCNJScraper(HTTPScraper):
 
         Raises:
             TypeError: Quando um kwarg desconhecido e passado.
-            ValidationError: Quando ``pesquisa`` nao e informado ou um
-                filtro tem formato invalido.
-            ValueError: Quando o intervalo de datas e invalido (fim antes
-                de inicio, formato divergente do backend).
+            ValidationError: Quando um filtro tem formato invalido.
+            ValueError: Quando nenhum entre ``pesquisa``,
+                ``numero_processo`` e ``sigla_tribunal`` e informado, ou
+                quando o intervalo de datas e invalido (fim antes de
+                inicio, formato divergente do backend).
 
         Exemplo:
             >>> import juscraper as jus
@@ -90,6 +101,11 @@ class ComunicaCNJScraper(HTTPScraper):
             ...     data_disponibilizacao_inicio="2024-01-01",
             ...     data_disponibilizacao_fim="2024-01-31",
             ...     paginas=range(1, 4),
+            ... )
+            >>> # Localizar as comunicacoes de um processo especifico,
+            >>> # sem depender de busca por texto:
+            >>> df2 = s.listar_comunicacoes(
+            ...     numero_processo="0601447-57.2026.6.00.0000",
             ... )
 
         See also:
@@ -119,6 +135,12 @@ class ComunicaCNJScraper(HTTPScraper):
             )
             raise
 
+        if inp.pesquisa is None and inp.numero_processo is None and inp.sigla_tribunal is None:
+            raise ValueError(
+                "E necessario informar ao menos um entre 'pesquisa', "
+                "'numero_processo' ou 'sigla_tribunal'."
+            )
+
         validate_intervalo_datas(
             inp.data_disponibilizacao_inicio,
             inp.data_disponibilizacao_fim,
@@ -133,6 +155,8 @@ class ComunicaCNJScraper(HTTPScraper):
                 pesquisa=inp.pesquisa,
                 pagina=pagina,
                 itens_por_pagina=inp.itens_por_pagina,
+                numero_processo=inp.numero_processo,
+                sigla_tribunal=inp.sigla_tribunal,
                 data_disponibilizacao_inicio=inp.data_disponibilizacao_inicio,
                 data_disponibilizacao_fim=inp.data_disponibilizacao_fim,
             )

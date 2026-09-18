@@ -32,18 +32,24 @@ DEFAULT_HEADERS: dict[str, str] = {
 
 def build_listar_comunicacoes_params(
     *,
-    pesquisa: str,
+    pesquisa: str | None = None,
     pagina: int,
     itens_por_pagina: int = 100,
+    numero_processo: str | None = None,
+    sigla_tribunal: str | None = None,
     data_disponibilizacao_inicio: str | None = None,
     data_disponibilizacao_fim: str | None = None,
 ) -> dict[str, Any]:
     """Monta a querystring aceita pelo endpoint de listagem.
 
     Args:
-        pesquisa: Termo de busca (parametro ``texto``).
+        pesquisa: Termo de busca (parametro ``texto``). Opcional.
         pagina: Numero da pagina (1-based).
         itens_por_pagina: Resultados por pagina (1-100).
+        numero_processo: CNJ, formatado ou so digitos (parametro
+            ``numeroProcesso``). Opcional.
+        sigla_tribunal: Sigla do tribunal de origem (parametro
+            ``siglaTribunal``). Opcional.
         data_disponibilizacao_inicio: ISO ``YYYY-MM-DD`` para o param
             ``dataDisponibilizacaoInicio`` da API.
         data_disponibilizacao_fim: ISO ``YYYY-MM-DD`` para o param
@@ -52,8 +58,13 @@ def build_listar_comunicacoes_params(
     params: dict[str, Any] = {
         "itensPorPagina": itens_por_pagina,
         "pagina": pagina,
-        "texto": pesquisa,
     }
+    if pesquisa is not None:
+        params["texto"] = pesquisa
+    if numero_processo is not None:
+        params["numeroProcesso"] = numero_processo
+    if sigla_tribunal is not None:
+        params["siglaTribunal"] = sigla_tribunal
     if data_disponibilizacao_inicio is not None:
         params["dataDisponibilizacaoInicio"] = data_disponibilizacao_inicio
     if data_disponibilizacao_fim is not None:
