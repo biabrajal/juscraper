@@ -7,6 +7,17 @@ TRE do DF: `api_publica_tre-dft` (com "t") devolve 404
 seguindo o padrao dos demais TREs. Confirmado por chamada direta a API em
 2026-09-17. Nao confundir com TJDFT (Justica Estadual, id_justica="8"),
 cujo alias e `api_publica_tjdft` (com "t") e esta correto.
+
+Cuidado especial com TRE-MG x TRE-MT (id_justica="6"): apesar da ordem
+alfabetica esperada ser 11=MG e 13=MT (mesmo padrao da Justica
+Estadual), a API real do Datajud devolve os processos com os codigos
+INVERTIDOS para esses dois tribunais especificamente -- numeros com
+"13" no campo id_tribunal pertencem ao TRE-MG, e numeros com "11"
+pertencem ao TRE-MT. Confirmado por chamadas diretas a API (consulta
+por `tribunal=` explicito + `numero_processo`) em 2026-09-28, com
+multiplos processos de cada lado. Nao foi verificado se a mesma
+inversao ocorre na Justica Estadual (TJMG/TJMT, id_justica="8") --
+nao mexer la sem confirmar.
 """
 
 ID_JUSTICA_TRIBUNAL_TO_ALIAS = {
@@ -85,9 +96,9 @@ ID_JUSTICA_TRIBUNAL_TO_ALIAS = {
     ("6", "08"): "api_publica_tre-es",  # TRE-ES
     ("6", "09"): "api_publica_tre-go",  # TRE-GO
     ("6", "10"): "api_publica_tre-ma",  # TRE-MA
-    ("6", "11"): "api_publica_tre-mg",  # TRE-MG
+    ("6", "11"): "api_publica_tre-mt",  # TRE-MT (nao "tre-mg" -- ver docstring do modulo)
     ("6", "12"): "api_publica_tre-ms",  # TRE-MS
-    ("6", "13"): "api_publica_tre-mt",  # TRE-MT
+    ("6", "13"): "api_publica_tre-mg",  # TRE-MG (nao "tre-mt" -- ver docstring do modulo)
     ("6", "14"): "api_publica_tre-pa",  # TRE-PA
     ("6", "15"): "api_publica_tre-pb",  # TRE-PB
     ("6", "16"): "api_publica_tre-pr",  # TRE-PR
