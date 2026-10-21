@@ -69,6 +69,7 @@ EXPECTED_COURT_OUTPUT_SCHEMAS: dict[tuple[str, str], tuple[str, str]] = {
     ("trf3", "cpopg"): ("juscraper.courts._trf.schemas", "OutputCpopgTRF"),
     ("trf5", "cpopg"): ("juscraper.courts._trf.schemas", "OutputCpopgTRF"),
     ("trf6", "cpopg"): ("juscraper.courts.trf6.schemas", "OutputCpopgTRF6"),
+    ("tse", "cjsg"): ("juscraper.courts.tse.schemas", "OutputCJSGTSE"),
 }
 
 EXPECTED_AGGREGATOR_OUTPUT_SCHEMAS: dict[tuple[str, str], tuple[str, str]] = {

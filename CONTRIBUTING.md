@@ -126,14 +126,15 @@ Comando padrão (rodar localmente antes de release ou após refactor amplo):
 pytest --nbmake docs/notebooks/ \
   --ignore=docs/notebooks/jusbr.ipynb \
   --ignore=docs/notebooks/tjmg.ipynb \
+  --ignore=docs/notebooks/tse.ipynb \
   --nbmake-timeout=300 \
   -n auto
 ```
 
 Notas:
 
-- **Não rodar em `pre-commit` nem em CI por PR.** São 25 notebooks contra rede real (~10-30 min com `pytest-xdist`); flakiness de tribunal vai bloquear merge sem motivo. O lugar certo, se um dia entrar no CI, é o workflow nightly proposto em #101 com `continue-on-error`.
-- `jusbr.ipynb` é excluído porque depende de token gov.br (`JUSBR_ACCESS_TOKEN`); `tjmg.ipynb` depende do extra `[tjmg]` instalado (`txtcaptcha`). Ambos rodam sob demanda quando as condições estão presentes.
+- **Não rodar em `pre-commit` nem em CI por PR.** São 26 notebooks contra rede real (~10-30 min com `pytest-xdist`); flakiness de tribunal vai bloquear merge sem motivo. O lugar certo, se um dia entrar no CI, é o workflow nightly proposto em #101 com `continue-on-error`.
+- `jusbr.ipynb` é excluído porque depende de token gov.br (`JUSBR_ACCESS_TOKEN`); `tjmg.ipynb` depende do extra `[tjmg]` instalado (`txtcaptcha`); `tse.ipynb` depende do extra `[tse]` (`playwright`) **e** do binário do Chromium (`playwright install chromium`), que a maioria dos ambientes de dev não tem instalado por padrão. Os três rodam sob demanda quando as condições estão presentes. O build do site Quarto renderiza os outputs já salvos no `.ipynb` sem re-executar (comportamento default do Quarto para notebooks com output existente), então isso não trava o deploy de docs.
 - Falha 5xx em um único notebook normalmente é instabilidade do tribunal — re-rodar o notebook isolado antes de reportar regressão (`pytest --nbmake docs/notebooks/<tribunal>.ipynb`).
 - Quando o resultado real divergir do output cacheado (ex.: coluna nova, ementa em formato diferente), o notebook deve ser **commitado com outputs limpos** (`jupyter nbconvert --clear-output --inplace docs/notebooks/<tribunal>.ipynb`) para que `git diff` futuro fique focado em código.
 

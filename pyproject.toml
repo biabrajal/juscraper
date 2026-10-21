@@ -85,6 +85,9 @@ web = [
 tjmg = [
     "txtcaptcha>=0.1.0",
 ]
+tse = [
+    "playwright>=1.40.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/jtrecenti/juscraper"

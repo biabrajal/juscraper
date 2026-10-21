@@ -1,0 +1,80 @@
+{
+  "mensagem": null,
+  "totalRegistros": 2,
+  "content": [
+    {
+      "id": null,
+      "siglaTribunalJE": "TSE",
+      "codigoDecisao": 3577492,
+      "numeroProcesso": "060057351",
+      "numeroDecisao": null,
+      "dataDecisao": "11/09/2026",
+      "anoEleicao": "2024",
+      "siglaClasse": "REspEl",
+      "descricaoClasse": "RECURSO ESPECIAL ELEITORAL",
+      "siglaUF": "BA",
+      "naturezaDocumento": "Sem anotação",
+      "nomeMunicipio": "PÉ DE SERRA",
+      "siglaTipoProcesso": "ED-AgR-REspEl",
+      "nomeTipoProcesso": "Embargos de Declaração no Agravo Regimental no Recurso Especial Eleitoral",
+      "descricaoTipoDecisao": "Acórdão",
+      "numeroUnico": "06005735120246050114",
+      "numeroProtocolo": "0",
+      "origemDecisao": "PJE",
+      "temInteiroTeorPDF": "true",
+      "temInteiroTeorAudio": null,
+      "textoDecisao": "<div><p>O Tribunal, por unanimidade, rejeitou os embargos de declaração, nos termos do voto do Relator.</p></div>",
+      "textoEmenta": "<p>ELEIÇÕES 2024. EMBARGOS DE DECLARAÇÃO. AGRAVO REGIMENTAL. SÚMULA-TSE No 55.</p>",
+      "assuntos": [
+        {"nomeAssunto": "AIJE"},
+        {"nomeAssunto": "Matéria processual"}
+      ],
+      "relatores": [
+        {
+          "autoridade": "Min.",
+          "nome": "André Mendonça",
+          "competencia": "Relator(a)",
+          "descricaoCompleta": "Relator(a) Min. André Mendonça"
+        }
+      ],
+      "partes": []
+    },
+    {
+      "id": null,
+      "siglaTribunalJE": "TSE",
+      "codigoDecisao": 3577493,
+      "numeroProcesso": "060057352",
+      "numeroDecisao": null,
+      "dataDecisao": "10/09/2026",
+      "anoEleicao": "2022",
+      "siglaClasse": "AgR-REspEl",
+      "descricaoClasse": "AGRAVO REGIMENTAL EM RECURSO ESPECIAL ELEITORAL",
+      "siglaUF": "SP",
+      "naturezaDocumento": "Jurisprudencial",
+      "nomeMunicipio": "SÃO PAULO",
+      "siglaTipoProcesso": "AgR-REspEl",
+      "nomeTipoProcesso": "Agravo Regimental em Recurso Especial Eleitoral",
+      "descricaoTipoDecisao": "Decisão sem resolução",
+      "numeroUnico": "06005735220226050115",
+      "numeroProtocolo": "0",
+      "origemDecisao": "PJE",
+      "temInteiroTeorPDF": "false",
+      "temInteiroTeorAudio": null,
+      "textoDecisao": "<div><p>Negado provimento ao agravo regimental.</p></div>",
+      "textoEmenta": null,
+      "assuntos": [
+        {"nomeAssunto": "Registro de candidatura"}
+      ],
+      "relatores": [
+        {
+          "autoridade": "Min.",
+          "nome": "Luís Roberto Barroso",
+          "competencia": "Relator(a)",
+          "descricaoCompleta": "Relator(a) Min. Luís Roberto Barroso"
+        }
+      ],
+      "partes": []
+    }
+  ],
+  "aggs": {}
+}
