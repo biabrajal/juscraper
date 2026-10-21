@@ -100,6 +100,15 @@ SLEEP_BETWEEN_PAGES = 0.5
 
 _RESPONSE_TIMEOUT_MS = 30_000
 
+# O Akamai do TSE bloqueia (HTTP 403 "Access Denied") o Chromium headless
+# pelo user agent, que contem "HeadlessChrome". Testado em 2026-10-20 no
+# macOS: so ``channel="chromium"`` continua bloqueado; com este UA de
+# Chrome comum o headless passa, no TSE e nos TREs.
+_HEADLESS_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+)
+
 
 def _import_playwright():
     try:
@@ -375,8 +384,17 @@ def _run_browser_session(
 
     paginas_por_numero: dict[int, dict] = {}
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=headless)
-        page = browser.new_page()
+        if headless:
+            # Ver _HEADLESS_USER_AGENT: sem trocar o UA o Akamai bloqueia.
+            browser = p.chromium.launch(
+                headless=True,
+                channel="chromium",
+                args=["--disable-blink-features=AutomationControlled"],
+            )
+            page = browser.new_page(user_agent=_HEADLESS_USER_AGENT)
+        else:
+            browser = p.chromium.launch(headless=False)
+            page = browser.new_page()
         try:
             resultado_inicial = _establish_session(
                 page,
