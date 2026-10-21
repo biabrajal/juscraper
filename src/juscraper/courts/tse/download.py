@@ -104,6 +104,12 @@ _RESPONSE_TIMEOUT_MS = 30_000
 # pelo user agent, que contem "HeadlessChrome". Testado em 2026-10-20 no
 # macOS: so ``channel="chromium"`` continua bloqueado; com este UA de
 # Chrome comum o headless passa, no TSE e nos TREs.
+# jurisprudencia.tre-rj.jus.br apresenta um certificado emitido para
+# *.tre-ac.jus.br (erro de configuracao do proprio tribunal, visto em
+# 2026-10-21) e o navegador recusa a conexao. So para esses tribunais a
+# verificacao do certificado e ignorada -- site publico, so leitura.
+_TRIBUNAIS_CERTIFICADO_INVALIDO = {"tre-rj"}
+
 _HEADLESS_USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
@@ -391,10 +397,13 @@ def _run_browser_session(
                 channel="chromium",
                 args=["--disable-blink-features=AutomationControlled"],
             )
-            page = browser.new_page(user_agent=_HEADLESS_USER_AGENT)
+            page = browser.new_page(
+                user_agent=_HEADLESS_USER_AGENT,
+                ignore_https_errors=tribunal in _TRIBUNAIS_CERTIFICADO_INVALIDO,
+            )
         else:
             browser = p.chromium.launch(headless=False)
-            page = browser.new_page()
+            page = browser.new_page(ignore_https_errors=tribunal in _TRIBUNAIS_CERTIFICADO_INVALIDO)
         try:
             resultado_inicial = _establish_session(
                 page,
