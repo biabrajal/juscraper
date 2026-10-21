@@ -134,6 +134,24 @@ def _decode_response_json(raw: bytes) -> dict:
         return json.loads(raw.decode("utf-8"))
 
 
+def _eh_resposta_de_busca(resp) -> bool:
+    """Predicate for ``page.expect_response``: only the search results envelope.
+
+    Other XHRs share ``SEARCH_ENDPOINT_MARKER`` in their URL -- e.g. the list
+    of procedural classes (``[{siglaClasse, descricaoClasse}, ...]``) that the
+    form loads. Matching on the URL alone sometimes captured that list instead
+    of the search results, raising ``TSEUnexpectedResponseError``. Requiring a
+    JSON object (the results envelope is a dict, the class list is a list)
+    skips those responses.
+    """
+    if SEARCH_ENDPOINT_MARKER not in resp.url:
+        return False
+    try:
+        return isinstance(_decode_response_json(resp.body()), dict)
+    except Exception:
+        return False
+
+
 def _decode_page_response(raw: bytes, *, contexto: str) -> dict:
     """Decodes a search-page response body and validates its shape.
 
@@ -207,7 +225,7 @@ def _establish_session(
     )
     if not tem_filtro_data:
         with page.expect_response(
-            lambda r: SEARCH_ENDPOINT_MARKER in r.url, timeout=_RESPONSE_TIMEOUT_MS
+            _eh_resposta_de_busca, timeout=_RESPONSE_TIMEOUT_MS
         ) as resp_info:
             page.get_by_role("textbox", name="Pesquisa livre").fill(pesquisa)
             page.get_by_role("button", name="Pesquisar", exact=True).first.click()
@@ -231,7 +249,7 @@ def _establish_session(
         dialog.get_by_text("Julgamento", exact=True).click()
         page.get_by_role("option", name="Publicação").click()
     with page.expect_response(
-        lambda r: SEARCH_ENDPOINT_MARKER in r.url, timeout=_RESPONSE_TIMEOUT_MS
+        _eh_resposta_de_busca, timeout=_RESPONSE_TIMEOUT_MS
     ) as resp_info:
         dialog.get_by_role("button", name="Pesquisar", exact=True).click()
     return _decode_page_response(resp_info.value.body(), contexto=f"buscar {pesquisa!r} com filtro de data")
@@ -241,7 +259,7 @@ def _set_page_size(page, tamanho_pagina: int) -> dict:
     """Changes the results-per-page dropdown to ``tamanho_pagina``. Returns the resulting page-1 JSON."""
     label = f"{tamanho_pagina} por página"
     with page.expect_response(
-        lambda r: SEARCH_ENDPOINT_MARKER in r.url, timeout=_RESPONSE_TIMEOUT_MS
+        _eh_resposta_de_busca, timeout=_RESPONSE_TIMEOUT_MS
     ) as resp_info:
         page.get_by_text(_PAGE_SIZE_LABEL_RE).first.click()
         page.get_by_role("option", name=label).click()
@@ -251,7 +269,7 @@ def _set_page_size(page, tamanho_pagina: int) -> dict:
 def _next_page(page) -> dict:
     """Clicks "Próxima página". Returns the raw JSON of the resulting page."""
     with page.expect_response(
-        lambda r: SEARCH_ENDPOINT_MARKER in r.url, timeout=_RESPONSE_TIMEOUT_MS
+        _eh_resposta_de_busca, timeout=_RESPONSE_TIMEOUT_MS
     ) as resp_info:
         page.get_by_role("button", name="Próxima página").first.click()
     return _decode_page_response(resp_info.value.body(), contexto="ir para a proxima pagina")
