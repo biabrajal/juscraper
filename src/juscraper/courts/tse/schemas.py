@@ -44,6 +44,8 @@ class InputCJSGTSE(SearchBase, DataJulgamentoMixin, DataPublicacaoMixin):
 
     tamanho_pagina: Literal[1, 10, 25, 50, 100, 250] = 250
     baixar_pdf: bool = False
+    tipos_decisao: list[str] | None = None
+    incluir_inteiro_teor: bool = False
 
 
 class OutputCJSGTSE(OutputCJSGBase):

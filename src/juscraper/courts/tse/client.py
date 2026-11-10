@@ -63,6 +63,8 @@ class TSEScraper(BaseScraper):
         data_julgamento_fim: str | None = None,
         data_publicacao_inicio: str | None = None,
         data_publicacao_fim: str | None = None,
+        tipos_decisao: list[str] | None = None,
+        incluir_inteiro_teor: bool = False,
         **kwargs,
     ) -> list[dict]:
         """Baixa os resultados brutos (JSON) da pesquisa de jurisprudência do TSE.
@@ -149,6 +151,8 @@ class TSEScraper(BaseScraper):
             data_publicacao_fim=data_publicacao_fim,
             tamanho_pagina=tamanho_pagina,
             baixar_pdf=baixar_pdf,
+            tipos_decisao=tipos_decisao,
+            incluir_inteiro_teor=incluir_inteiro_teor,
         )
         return cjsg_download_manager(
             pesquisa=inp.pesquisa,
@@ -160,6 +164,8 @@ class TSEScraper(BaseScraper):
             data_julgamento_fim=inp.data_julgamento_fim,
             data_publicacao_inicio=inp.data_publicacao_inicio,
             data_publicacao_fim=inp.data_publicacao_fim,
+            tipos_decisao=inp.tipos_decisao,
+            incluir_inteiro_teor=inp.incluir_inteiro_teor,
             download_path=self.download_path,
             headless=self.headless,
             verbose=self.verbose,

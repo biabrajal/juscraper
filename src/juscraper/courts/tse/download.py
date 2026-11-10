@@ -100,6 +100,9 @@ SLEEP_BETWEEN_PAGES = 0.5
 
 _RESPONSE_TIMEOUT_MS = 30_000
 
+# Rotulos do grupo "Tipo de Decisão" do modal "Avançada".
+TIPOS_DECISAO = ("Acórdão", "Decisão monocrática", "Sentença", "Resolução", "Decisão sem resolução")
+
 # O Akamai do TSE bloqueia (HTTP 403 "Access Denied") o Chromium headless
 # pelo user agent, que contem "HeadlessChrome". Testado em 2026-10-20 no
 # macOS: so ``channel="chromium"`` continua bloqueado; com este UA de
@@ -218,6 +221,8 @@ def _establish_session(
     data_julgamento_fim: str | None = None,
     data_publicacao_inicio: str | None = None,
     data_publicacao_fim: str | None = None,
+    tipos_decisao: list[str] | None = None,
+    incluir_inteiro_teor: bool = False,
 ) -> dict:
     """Drives the search UI once for ``pesquisa`` (+ optional date filter).
 
@@ -238,7 +243,7 @@ def _establish_session(
     tem_filtro_data = bool(
         data_julgamento_inicio or data_julgamento_fim or data_publicacao_inicio or data_publicacao_fim
     )
-    if not tem_filtro_data:
+    if not tem_filtro_data and tipos_decisao is None and not incluir_inteiro_teor:
         with page.expect_response(
             _eh_resposta_de_busca, timeout=_RESPONSE_TIMEOUT_MS
         ) as resp_info:
@@ -263,11 +268,34 @@ def _establish_session(
     if data_publicacao_inicio or data_publicacao_fim:
         dialog.get_by_text("Julgamento", exact=True).click()
         page.get_by_role("option", name="Publicação").click()
+    if tipos_decisao is not None:
+        _marcar_tipos_decisao(page, tipos_decisao)
+    if incluir_inteiro_teor:
+        # Sem isso a busca olha so ementa/indexacao, nao o texto da decisao.
+        caixa = page.locator("mat-checkbox").filter(has_text="Incluir inteiro teor").last
+        if not caixa.locator("input").is_checked():
+            caixa.locator("label").click()
     with page.expect_response(
         _eh_resposta_de_busca, timeout=_RESPONSE_TIMEOUT_MS
     ) as resp_info:
         dialog.get_by_role("button", name="Pesquisar", exact=True).click()
     return _decode_page_response(resp_info.value.body(), contexto=f"buscar {pesquisa!r} com filtro de data")
+
+
+def _marcar_tipos_decisao(page, tipos_decisao: list[str]) -> None:
+    """Deixa marcados no modal "Avançada" exatamente os tipos em ``tipos_decisao``.
+
+    Por padrão o formulário vem com "Acórdão", "Resolução" e "Decisão sem
+    resolução" marcados e "Decisão monocrática" e "Sentença" desmarcados --
+    sem mexer aqui, a busca nunca traz monocráticas nem sentenças.
+    """
+    desconhecidos = set(tipos_decisao) - set(TIPOS_DECISAO)
+    if desconhecidos:
+        raise ValueError(f"tipos_decisao desconhecidos: {sorted(desconhecidos)}. Validos: {TIPOS_DECISAO}")
+    for tipo in TIPOS_DECISAO:
+        caixa = page.locator("mat-checkbox").filter(has_text=re.compile(rf"^\s*{re.escape(tipo)}\s*$")).last
+        if caixa.locator("input").is_checked() != (tipo in tipos_decisao):
+            caixa.locator("label").click()
 
 
 def _set_page_size(page, tamanho_pagina: int) -> dict:
@@ -302,6 +330,8 @@ def cjsg_download_manager(
     data_julgamento_fim: str | None = None,
     data_publicacao_inicio: str | None = None,
     data_publicacao_fim: str | None = None,
+    tipos_decisao: list[str] | None = None,
+    incluir_inteiro_teor: bool = False,
     headless: bool = True,
     verbose: int = 0,
 ) -> list[dict]:
@@ -355,6 +385,8 @@ def cjsg_download_manager(
             data_julgamento_fim=data_julgamento_fim,
             data_publicacao_inicio=data_publicacao_inicio,
             data_publicacao_fim=data_publicacao_fim,
+            tipos_decisao=tipos_decisao,
+            incluir_inteiro_teor=incluir_inteiro_teor,
             headless=headless,
             verbose=verbose,
         ).result()
@@ -377,6 +409,8 @@ def _run_browser_session(
     headless: bool,
     verbose: int,
     tribunal: str = "tse",
+    tipos_decisao: list[str] | None = None,
+    incluir_inteiro_teor: bool = False,
 ) -> list[dict]:
     """Runs the Playwright-driven search + pagination. See :func:`cjsg_download_manager`."""
     if sys.platform == "win32":
@@ -413,6 +447,8 @@ def _run_browser_session(
                 data_julgamento_fim=data_julgamento_fim,
                 data_publicacao_inicio=data_publicacao_inicio,
                 data_publicacao_fim=data_publicacao_fim,
+                tipos_decisao=tipos_decisao,
+                incluir_inteiro_teor=incluir_inteiro_teor,
             )
             if tamanho_pagina == DEFAULT_UI_PAGE_SIZE:
                 primeira_pagina = resultado_inicial
